@@ -6,6 +6,7 @@ import {
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/dashboard";
+import AdminDashboard from "./pages/adminDashboard";
 
 function App() {
   return (
@@ -21,6 +22,11 @@ function App() {
          <Route
           path="/dashboard"
           element={<Dashboard />}
+        />
+
+        <Route
+          path="/adminDashboard"
+          element={<AdminDashboard />}
         />
 
 

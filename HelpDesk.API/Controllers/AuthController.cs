@@ -1,13 +1,12 @@
 using HelpDesk.API.Data;
 using HelpDesk.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-    
+
 namespace HelpDesk.API.Controllers
 {
     [ApiController]
@@ -16,17 +15,13 @@ namespace HelpDesk.API.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             AppDbContext context,
-            IConfiguration configuration,
-            ILogger<AuthController> logger
-        )
+            IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
-            _logger = logger;
         }
 
         [HttpGet("test")]
@@ -35,64 +30,88 @@ namespace HelpDesk.API.Controllers
             return Ok("API is working");
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(
-            [FromBody] LoginModel model
-        )
-        {
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-
-            if (existingUser != null)
-            {
-                return BadRequest(new { message = "User already exists" });
-            }
-
-            var user = new User
-            {
-                Email = model.Email,
-                Password = BCrypt.Net.BCrypt.HashPassword(model.Password)
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "User registered successfully" });
-        }
-
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {
-            try
+            if (model == null ||
+                string.IsNullOrWhiteSpace(model.Email) ||
+                string.IsNullOrWhiteSpace(model.Password))
             {
-                var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
-
-                if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
+                return BadRequest(new
                 {
-                    return Unauthorized(new { message = "Invalid email or password" });
-                }
-
-                var key = _configuration["Jwt:Key"];
-                if (string.IsNullOrEmpty(key))
-                    throw new InvalidOperationException("Jwt:Key is missing in configuration.");
-
-                var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-                var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["Jwt:Issuer"],
-                    audience: _configuration["Jwt:Audience"],
-                    claims: new[] { new Claim(ClaimTypes.Email, user.Email) },
-                    expires: DateTime.Now.AddHours(2),
-                    signingCredentials: creds
-                );
-
-                return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+                    message = "Email and password are required"
+                });
             }
-            catch (Exception ex)
+
+            var user = _context.Users
+                .FirstOrDefault(u => u.Email == model.Email);
+
+            if (user == null)
             {
-                // Development-only: return the exception so you can see exactly what failed.
-                return StatusCode(500, new { error = ex.Message, stack = ex.StackTrace });
+                return Unauthorized(new
+                {
+                    message = "Invalid email or password"
+                });
             }
+
+            if (user.Password != model.Password)
+            {
+                return Unauthorized(new
+                {
+                    message = "Invalid email or password"
+                });
+            }
+
+            var token = GenerateJwtToken(user);
+
+            return Ok(new
+            {
+                message = "Login successful",
+                token,
+                id = user.Id,
+                fullName = user.FullName,
+                email = user.Email,
+                roleId = user.RoleId
+            });
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        public IActionResult Profile()
+        {
+            return Ok(new
+            {
+                message = "Protected endpoint",
+                username = User.Identity?.Name
+            });
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+            var claims = new[]
+            {
+        new Claim(ClaimTypes.Name, user.FullName),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.RoleId)
+    };
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _configuration["Jwt:Key"]!));
+
+            var credentials = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(2),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler()
+                .WriteToken(token);
         }
     }
 }
