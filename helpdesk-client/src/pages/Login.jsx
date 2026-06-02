@@ -39,11 +39,14 @@ function Login() {
 
     if (response.ok) {
       localStorage.setItem("token", data?.token);
-      localStorage.setItem("roleId", data?.roleId);
-      if (response.data.roleId === 1) {
+      localStorage.setItem("roleId", data?.user?.roleId);
+
+      const roleId = data?.user?.roleId;
+
+      if (roleId === 1) {
         navigate("/AdminDashboard");
-      }
-      else if (response.data.roleId === 2) {
+      } 
+      else if (roleId === 2) {
         navigate("/Dashboard");
       }
     } else {
