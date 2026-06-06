@@ -40,6 +40,7 @@ function Login() {
     if (response.ok) {
       localStorage.setItem("token", data?.token);
       localStorage.setItem("roleId", data?.user?.roleId);
+      localStorage.setItem("fullName", data?.user?.fullName);
 
       const roleId = data?.user?.roleId;
 

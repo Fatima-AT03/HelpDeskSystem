@@ -13,5 +13,13 @@ namespace HelpDesk.API.Data
         }
 
         public DbSet<User> Users { get; set; }
+
+        public DbSet<Ticket> Tickets => Set<Ticket>();
+
+        public DbSet<Category> Categories => Set<Category>();
+
+        public DbSet<Priority> Priorities => Set<Priority>();
+
+        public DbSet<Status> Statuses => Set<Status>();
     }
 }
