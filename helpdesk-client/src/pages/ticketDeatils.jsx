@@ -1,8 +1,12 @@
 import NavBar from "../components/navbar";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "../styles/Dashboard.css";
 import "../styles/ticketDetails.css";
-import { FaArrowLeft, FaClock, FaUser, FaEllipsisH } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaDownload,
+  FaFileAlt,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 function TicketDetails() {
@@ -17,150 +21,158 @@ function TicketDetails() {
       />
 
       <main className="main-content">
-        {/* Header */}
-        <div className="ticket-header">
-          <div className="ticket-header-left">
-            <button className="back-btn" onClick={() => navigate("/tickets")}>
-              <FaArrowLeft />
-              Back to My Tickets
-            </button>
+        <button
+          className="back-btn"
+          onClick={() => navigate("/tickets")}
+        >
+          <FaArrowLeft />
+          Back to My Tickets
+        </button>
 
-            <div className="ticket-title-row">
-              <h2>TKT-2056 VPN not connecting</h2>
-
-              <span className="badge high">High</span>
-
-              <span className="badge progress">In Progress</span>
-            </div>
-          </div>
-
-          <div className="ticket-actions">
-            <button className="secondary-btn">
-              More
-              <FaEllipsisH />
-            </button>
-
-            <button className="primary-btn">Update Status</button>
-          </div>
-        </div>
-
-        {/* Top Info */}
-        <div className="ticket-info-card">
-          <div className="info-item">
-            <FaUser />
-            <div>
-              <span>Requester</span>
-              <h4>John Smith</h4>
-            </div>
-          </div>
-
-          <div className="info-item">
-            <span>Category</span>
-            <h4>Network</h4>
-          </div>
-
-          <div className="info-item">
-            <FaClock />
-            <div>
-              <span>Created</span>
-              <h4>May 21, 2024 10:32 AM</h4>
-            </div>
-          </div>
-
-          <div className="info-item">
-            <FaClock />
-            <div>
-              <span>Last Updated</span>
-              <h4>May 21, 2024 11:36 AM</h4>
-            </div>
-          </div>
-
-          <div className="info-item">
-            <FaUser />
-            <div>
-              <span>Assigned To</span>
-              <h4>Sarah Johnson</h4>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="tabs">
-          <button className="tab active">Details</button>
-          <button className="tab">Comments (3)</button>
-          <button className="tab">Updates (2)</button>
-          <button className="tab">Attachments (1)</button>
-        </div>
-
-        {/* Content */}
         <div className="ticket-content">
-          {/* Left */}
+          {/* Ticket Details */}
           <div className="details-card">
-            <div className="field">
-              <label>Title</label>
-              <p>VPN not connecting to company network</p>
+            <div className="card-header">
+              <h2>Ticket Details</h2>
+              <span className="status-badge">Open</span>
             </div>
 
-            <div className="field">
-              <label>Description</label>
+            <div className="ticket-details-grid">
+              <div className="detail-row">
+                <span className="detail-label">Ticket ID</span>
+                <span className="detail-value">#TKT-2056</span>
+              </div>
+
+              <div className="detail-row">
+                <span className="detail-label">Title</span>
+                <span className="detail-value">
+                  VPN not connecting to company network
+                </span>
+              </div>
+
+              <div className="detail-row">
+                <span className="detail-label">Category</span>
+                <span className="detail-value">Network</span>
+              </div>
+
+              <div className="detail-row">
+                <span className="detail-label">Priority</span>
+                <span className="detail-value priority-high">
+                  High
+                </span>
+              </div>
+
+              <div className="detail-row">
+                <span className="detail-label">CreatedBy</span>
+                <span className="detail-value">
+                  Sara Johnson
+                </span>
+              </div>
+
+              <div className="detail-row">
+                <span className="detail-label">Created</span>
+                <span className="detail-value">
+                  May 21, 2024 10:32 AM
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">AssignedTo</span>
+                <span className="detail-value">
+                  John Smith
+                </span>
+              </div>
+            </div>
+
+            
+            <div className="ticket-description">
+              <h4>Description</h4>
+
               <p>
-                I am unable to connect to the VPN since this morning. It shows
-                "Connection failed, Please check your network". I have already
-                restarted my laptop.
+                I am unable to connect to the VPN since this
+                morning. It shows "Connection failed. Please
+                check your network". I have already restarted
+                my laptop and internet connection but the issue
+                still persists.
               </p>
             </div>
 
-            <div className="details-grid">
-              <div>
-                <label>Priority</label>
-                <span className="badge high">High</span>
-              </div>
+            <div className="attachment-section">
+              <h4>Attachment</h4>
 
-              <div>
-                <label>Status</label>
-                <span className="badge progress">In Progress</span>
-              </div>
+              <div className="attachment-box">
+                <div className="attachment-file">
+                  <FaFileAlt />
+                  <span>vpn_error_screenshot.png (2.4 MB)</span>
+                </div>
 
-              <div>
-                <label>Category</label>
-                <p>Network</p>
-              </div>
-
-              <div>
-                <label>Subcategory</label>
-                <p>VPN / Connectivity</p>
+                <FaDownload className="download-btn" />
               </div>
             </div>
           </div>
 
-          {/* Right */}
-          <div className="timeline-card">
-            <h3>Activity Timeline</h3>
+          {/* Comments */}
+          <div className="comments-card">
+            <h2>Comments</h2>
 
-            <div className="timeline">
-              <div className="timeline-item">
-                <div className="dot blue"></div>
-                <div>
-                  <span>May 21, 11:36 AM</span>
-                  <p>Sarah Johnson assigned to you</p>
+            <div className="comments-list">
+              <div className="comment">
+                <div className="avatar">J</div>
+
+                <div className="comment-body">
+                  <div className="comment-header">
+                    <strong>John Smith</strong>
+                    <span>May 21, 10:35 AM</span>
+                  </div>
+
+                  <p>
+                    I cannot access the VPN. It keeps showing
+                    connection failed even after restarting my
+                    laptop.
+                  </p>
                 </div>
               </div>
 
-              <div className="timeline-item">
-                <div className="dot blue"></div>
-                <div>
-                  <span>May 21, 10:45 AM</span>
-                  <p>We are checking your VPN configuration</p>
+              <div className="comment">
+                <div className="avatar agent">S</div>
+
+                <div className="comment-body">
+                  <div className="comment-header">
+                    <strong>Sarah Johnson</strong>
+                    <span>May 21, 10:45 AM</span>
+                  </div>
+
+                  <p>
+                    Thank you for reporting the issue. We are
+                    currently reviewing your VPN configuration.
+                  </p>
                 </div>
               </div>
 
-              <div className="timeline-item">
-                <div className="dot white"></div>
-                <div>
-                  <span>May 21, 10:33 AM</span>
-                  <p>Ticket created</p>
+              <div className="comment">
+                <div className="avatar">J</div>
+
+                <div className="comment-body">
+                  <div className="comment-header">
+                    <strong>John Smith</strong>
+                    <span>May 21, 11:10 AM</span>
+                  </div>
+
+                  <p>
+                    Thank you. Please let me know if you need
+                    any additional information.
+                  </p>
                 </div>
               </div>
+            </div>
+
+            <div className="comment-input">
+              <textarea
+                placeholder="Write a comment..."
+              ></textarea>
+
+              <button className="send-btn">
+                Add Comment
+              </button>
             </div>
           </div>
         </div>

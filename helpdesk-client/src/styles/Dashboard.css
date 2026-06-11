@@ -56,6 +56,7 @@
 
 .chart-card {
   background: #07133d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 20px;
   border-radius: 15px;
 }
