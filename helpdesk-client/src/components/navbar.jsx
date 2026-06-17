@@ -34,6 +34,20 @@ function NavBar({ isOpen, toggleSidebar }) {
     }
   }
 
+  function addReports() {
+    if (localStorage.roleId == 1) {
+      return (
+        <NavLink
+          to="/reports"
+          className={({ isActive }) => (isActive ? "active" : "")}
+        >
+          <FaChartBar />
+          <span>Reports</span>
+        </NavLink>
+      );
+    }
+  }
+
   return (
     <aside className={`sidebar ${isOpen ? "openSidebar" : ""}`}>
       <div className="logo">
@@ -43,7 +57,6 @@ function NavBar({ isOpen, toggleSidebar }) {
       </div>
 
       <nav>
-        {/* NavLink automatically handles your active classes based on route */}
         <NavLink
           to="/dashboard"
           className={({ isActive }) => (isActive ? "active" : "")}
@@ -62,13 +75,7 @@ function NavBar({ isOpen, toggleSidebar }) {
           <span>My Tickets</span>
         </NavLink>
 
-        <NavLink
-          to="/reports"
-          className={({ isActive }) => (isActive ? "active" : "")}
-        >
-          <FaChartBar />
-          <span>Reports</span>
-        </NavLink>
+        {addReports()}
 
         <NavLink
           to="/users"

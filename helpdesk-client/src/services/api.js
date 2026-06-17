@@ -211,3 +211,19 @@ export const uploadAttachment = async (ticketId, file) => {
 
   return await response.json();
 };
+
+export const getReports = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch("http://localhost:5213/api/reports", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load reports");
+  }
+
+  return await response.json();
+};
