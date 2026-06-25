@@ -1,4 +1,5 @@
 ﻿using HelpDesk.API.Data;
+using HelpDesk.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,23 +11,19 @@ namespace HelpDesk.API.Controllers
      [Authorize]
      public class CategoriesController : ControllerBase
      {
-          private readonly AppDbContext _context;
+          private readonly ICategoryService _categoryService;
 
-          public CategoriesController(AppDbContext context)
+          public CategoriesController(
+              ICategoryService categoryService)
           {
-               _context = context;
+               _categoryService = categoryService;
           }
 
           [HttpGet]
           public async Task<IActionResult> GetCategories()
           {
-               var categories = await _context.Categories
-                   .Select(c => new
-                   {
-                        c.Id,
-                        c.Name
-                   })
-                   .ToListAsync();
+               var categories =
+                   await _categoryService.GetCategories();
 
                return Ok(categories);
           }

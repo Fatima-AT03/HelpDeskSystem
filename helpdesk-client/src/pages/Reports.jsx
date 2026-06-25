@@ -104,12 +104,12 @@ function Reports() {
   ];
 
   const CATEGORY_COLORS = [
-    "#06B6D4", // Email - Cyan
-    "#A855F7", // Access Request - Violet
-    "#F97316", // Hardware - Orange
-    "#22C55E", // Network - Green
-    "#EC4899", // Software - Pink
-    "#94A3B8", // Other - Light Slate
+    "#06B6D4", 
+    "#A855F7",
+    "#F97316", 
+    "#22C55E",
+    "#EC4899", 
+    "#94A3B8", 
   ];
 
   return (

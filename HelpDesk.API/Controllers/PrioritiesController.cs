@@ -1,4 +1,5 @@
 ﻿using HelpDesk.API.Data;
+using HelpDesk.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,23 +11,18 @@ namespace HelpDesk.API.Controllers
      [Authorize]
      public class PrioritiesController : ControllerBase
      {
-          private readonly AppDbContext _context;
+          private readonly IPriorityService _priorityService;
 
-          public PrioritiesController(AppDbContext context)
+          public PrioritiesController(
+              IPriorityService priorityService)
           {
-               _context = context;
+               _priorityService = priorityService;
           }
 
           [HttpGet]
           public async Task<IActionResult> GetPriorities()
           {
-               var priorities = await _context.Priorities
-                   .Select(p => new
-                   {
-                        p.Id,
-                        p.Name
-                   })
-                   .ToListAsync();
+               var priorities = await _priorityService.GetPriorities();
 
                return Ok(priorities);
           }
