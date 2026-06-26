@@ -1,4 +1,5 @@
-﻿using HelpDesk.API.Data;
+﻿using AutoMapper;
+using HelpDesk.API.Data;
 using HelpDesk.API.DTO;
 using HelpDesk.API.Models;
 using HelpDesk.API.Services.Interfaces;
@@ -9,41 +10,33 @@ namespace HelpDesk.API.Services.Implementations
      public class CommentService : ICommentService
      {
           private readonly AppDbContext _context;
+          private readonly IMapper _mapper;
 
-          public CommentService(AppDbContext context)
+          public CommentService(AppDbContext context, IMapper mapper)
           {
                _context = context;
+               _mapper = mapper;
           }
 
-          public async Task<IEnumerable<TicketCommentDto>>GetComments(int ticketId)
+          public async Task<IEnumerable<TicketCommentDto>> GetComments(int ticketId)
           {
-               return await _context.TicketComments
+               var comments = await _context.TicketComments
                    .Include(c => c.User)
                    .Where(c => c.TicketId == ticketId)
                    .OrderBy(c => c.CreatedAt)
-                   .Select(c => new TicketCommentDto
-                   {
-                        Id = c.Id,
-                        TicketId = c.TicketId,
-                        UserId = c.UserId,
-                        UserName = c.User!.FullName,
-                        Comment = c.Comment,
-                        CreatedAt = c.CreatedAt
-                   })
                    .ToListAsync();
+
+               return _mapper.Map<List<TicketCommentDto>>(comments);
           }
 
           public async Task<bool> AddComment(
-            CreateCommentDto dto,
-            int userId)
+              CreateCommentDto dto,
+              int userId)
           {
-               var comment = new TicketComment
-               {
-                    TicketId = dto.TicketId,
-                    UserId = userId,
-                    Comment = dto.Comment,
-                    CreatedAt = DateTime.UtcNow
-               };
+               var comment = _mapper.Map<TicketComment>(dto);
+
+               comment.UserId = userId;
+               comment.CreatedAt = DateTime.UtcNow;
 
                _context.TicketComments.Add(comment);
 
@@ -85,10 +78,13 @@ namespace HelpDesk.API.Services.Implementations
                return true;
           }
 
-          public async Task<TicketComment?> UpdateComment(int id, UpdateCommentDto dto, int userId)
+          public async Task<TicketComment?> UpdateComment(
+              int id,
+              UpdateCommentDto dto,
+              int userId)
           {
-               var comment =
-                   await _context.TicketComments.FindAsync(id);
+               var comment = await _context.TicketComments
+                   .FirstOrDefaultAsync(c => c.Id == id);
 
                if (comment == null)
                     return null;
@@ -96,7 +92,7 @@ namespace HelpDesk.API.Services.Implementations
                if (comment.UserId != userId)
                     return null;
 
-               comment.Comment = dto.Comment;
+               _mapper.Map(dto, comment);
 
                await _context.SaveChangesAsync();
 
@@ -105,8 +101,8 @@ namespace HelpDesk.API.Services.Implementations
 
           public async Task<bool> DeleteComment(int id)
           {
-               var comment =
-                   await _context.TicketComments.FindAsync(id);
+               var comment = await _context.TicketComments
+                   .FirstOrDefaultAsync(c => c.Id == id);
 
                if (comment == null)
                     return false;

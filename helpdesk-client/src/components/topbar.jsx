@@ -32,11 +32,7 @@ function TopBar({ toggleSidebar }) {
     try {
       await markNotificationAsRead(notification.id);
 
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === notification.id ? { ...n, isRead: true } : n,
-        ),
-      );
+      setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
 
       if (notification.ticketId) {
         navigate(`/tickets/${notification.ticketId}`);
@@ -76,24 +72,26 @@ function TopBar({ toggleSidebar }) {
             <div className="notification-dropdown">
               <h4>Notifications</h4>
 
-              {notifications.length === 0 ? (
-                <p className="empty-notification">No notifications</p>
+              {notifications.filter((n) => !n.isRead).length === 0 ? (
+                <p className="empty-notification">No new notifications</p>
               ) : (
-                notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`notification-item ${
-                      !notification.isRead ? "unread" : ""
-                    }`}
-                    onClick={() => handleNotificationClick(notification)}
-                  >
-                    <p>{notification.message}</p>
+                notifications
+                  .filter((n) => !n.isRead)
+                  .map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`notification-item ${
+                        !notification.isRead ? "unread" : ""
+                      }`}
+                      onClick={() => handleNotificationClick(notification)}
+                    >
+                      <p>{notification.message}</p>
 
-                    <small>
-                      {new Date(notification.createdAt).toLocaleString()}
-                    </small>
-                  </div>
-                ))
+                      <small>
+                        {new Date(notification.createdAt).toLocaleString()}
+                      </small>
+                    </div>
+                  ))
               )}
             </div>
           )}

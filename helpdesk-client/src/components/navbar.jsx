@@ -20,7 +20,7 @@ function NavBar({ isOpen, toggleSidebar }) {
   };
 
   function addCreateTicket() {
-    if (localStorage.roleId == 1 || localStorage.roleId == 2) {
+    if (localStorage.roleId == 1 || localStorage.roleId == 2 || localStorage.roleId == 4) {
       return (
         <NavLink
           to="/createTicket"

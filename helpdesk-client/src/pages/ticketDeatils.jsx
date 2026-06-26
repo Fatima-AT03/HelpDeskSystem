@@ -1,4 +1,5 @@
 import NavBar from "../components/navbar";
+import TopBar from "../components/topbar";
 import { useState, useEffect, useCallback } from "react";
 import "../styles/Dashboard.css";
 import "../styles/ticketDetails.css";
@@ -242,10 +243,11 @@ function TicketDetails() {
       />
 
       <main className="main-content">
-        <button className="back-btn" onClick={() => navigate("/tickets")}>
+        <TopBar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        {/* <button className="back-btn" onClick={() => navigate("/tickets")}>
           <FaArrowLeft />
           Back to My Tickets
-        </button>
+        </button> */}
 
         <div className="ticket-content">
           <div className="details-card">

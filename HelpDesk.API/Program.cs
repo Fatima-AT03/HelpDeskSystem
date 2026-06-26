@@ -6,6 +6,7 @@ using Microsoft.Extensions.FileProviders;
 using System.Text;
 using HelpDesk.API.Services.Interfaces;
 using HelpDesk.API.Services.Implementations;
+using HelpDesk.API.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,7 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 
