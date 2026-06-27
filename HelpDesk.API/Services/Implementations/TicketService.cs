@@ -100,16 +100,25 @@ namespace HelpDesk.API.Services.Implementations
           }
 
 
-          public async Task<Ticket?> UpdateTicket(int id, Ticket updated)
+          public async Task<Ticket?> UpdateTicket(int id, Ticket updated, string role, int userId)
           {
                var ticket = await _context.Tickets.FindAsync(id);
 
                if (ticket == null)
                     return null;
 
-               _mapper.Map(updated, ticket);
+               if (role == "Employee")
+               {
+                    if (ticket.StatusId != 1)
+                         return null;
 
-               ticket.UpdatedAt = DateTime.UtcNow;
+                    if (ticket.CreatedBy != userId)
+                         return null;
+               }
+
+               ticket.Title = updated.Title;
+               ticket.Description = updated.Description;
+               ticket.Priority = updated.Priority;
 
                await _context.SaveChangesAsync();
 
@@ -241,6 +250,34 @@ namespace HelpDesk.API.Services.Implementations
                return (true, "Status updated successfully");
           }
 
-          
+          public async Task<(bool Success, string Message)> DeleteTicket(int id, string role, int userId)
+          {
+               var ticket = await _context.Tickets.FindAsync(id);
+
+               if (ticket == null)
+                    return (false, "Ticket not found.");
+
+               if (role == "Employee")
+               {
+                    if (ticket.StatusId != 1) 
+                         return (false, "You can only delete Open tickets.");
+
+                    if (ticket.CreatedBy != userId)
+                         return (false, "You can only delete your own tickets.");
+               }
+
+               var hasComments = await _context.TicketComments
+                                   .AnyAsync(c => c.TicketId == id);
+
+               if (hasComments)
+               {
+                    return (false, "The ticket has comments and can't be deleted.");
+               }
+
+               _context.Tickets.Remove(ticket);
+               await _context.SaveChangesAsync();
+
+               return (true, "Ticket deleted successfully.");
+          }
      }
 }

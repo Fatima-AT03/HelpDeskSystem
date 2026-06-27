@@ -250,3 +250,72 @@ export const markNotificationAsRead = async (id) => {
     },
   });
 };
+
+export const updateTicket = async (ticketId, ticket) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/tickets/${ticketId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(ticket),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update ticket");
+  }
+
+  return await response.json();
+};
+
+export const deleteTicket = async (ticketId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/tickets/${ticketId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error);
+  }
+
+  return await response.json();
+};
+
+export const getCategories = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/categories`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load categories");
+  }
+
+  return await response.json();
+};
+
+export const getPriorities = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/priorities`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load priorities");
+  }
+
+  return await response.json();
+};

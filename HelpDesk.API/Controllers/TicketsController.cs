@@ -66,11 +66,13 @@ namespace HelpDesk.API.Controllers
           [HttpPut("{id}")]
           public async Task<IActionResult> UpdateTicket(int id, Ticket updated)
           {
-               var ticket =
-                   await _ticketService.UpdateTicket(id, updated);
+               var role = User.FindFirst(ClaimTypes.Role)?.Value!;
+               var userId = int.Parse(User.FindFirst("userId")!.Value);
+
+               var ticket = await _ticketService.UpdateTicket(id, updated, role, userId);
 
                if (ticket == null)
-                    return NotFound();
+                    return BadRequest("You are not allowed to edit this ticket.");
 
                return Ok(ticket);
           }
@@ -110,8 +112,25 @@ namespace HelpDesk.API.Controllers
                var result =
                    await _ticketService.UpdateStatus(
                        id,
-                       dto.Status,
+                       dto.Status!,
                        role);
+
+               if (!result.Success)
+                    return BadRequest(result.Message);
+
+               return Ok(new
+               {
+                    message = result.Message
+               });
+          }
+
+          [HttpDelete("{id}")]
+          public async Task<IActionResult> DeleteTicket(int id)
+          {
+               var role = User.FindFirst(ClaimTypes.Role)?.Value!;
+               var userId = int.Parse(User.FindFirst("userId")!.Value);
+
+               var result = await _ticketService.DeleteTicket(id, role, userId);
 
                if (!result.Success)
                     return BadRequest(result.Message);

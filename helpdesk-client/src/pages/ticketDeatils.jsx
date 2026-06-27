@@ -244,10 +244,6 @@ function TicketDetails() {
 
       <main className="main-content">
         <TopBar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        {/* <button className="back-btn" onClick={() => navigate("/tickets")}>
-          <FaArrowLeft />
-          Back to My Tickets
-        </button> */}
 
         <div className="ticket-content">
           <div className="details-card">

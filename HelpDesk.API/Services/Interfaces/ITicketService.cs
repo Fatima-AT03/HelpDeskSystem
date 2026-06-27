@@ -11,7 +11,9 @@ namespace HelpDesk.API.Services.Interfaces
 
           Task<Ticket> CreateTicket(CreateTicketDto dto, int userId);
 
-          Task<Ticket?> UpdateTicket(int id, Ticket updated);
+          Task<Ticket?> UpdateTicket(int id, Ticket updated, string role, int userId);
+
+          Task<(bool Success, string Message)> DeleteTicket(int id, string role, int userId);
 
           Task<IEnumerable<AssignableUserDto>> GetAssignableUsers();
 

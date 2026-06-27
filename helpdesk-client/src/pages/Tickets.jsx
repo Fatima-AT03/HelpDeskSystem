@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getTickets } from "../services/api";
+import {
+  getTickets,
+  deleteTicket,
+  updateTicket,
+  getCategories,
+  getPriorities,
+} from "../services/api";
 import "../styles/Dashboard.css";
 import NavBar from "../components/navbar";
 import TopBar from "../components/topbar";
@@ -10,12 +17,35 @@ function Tickets() {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const [categories, setCategories] = useState([]);
+  const [priorities, setPriorities] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingTicket, setEditingTicket] = useState({
+    id: 0,
+    title: "",
+    description: "",
+    priorityId: "",
+    categoryId: "",
+  });
   const assignedTickets = tickets.filter((t) => t.assignedTo !== null);
-
   const unassignedTickets = tickets.filter((t) => t.assignedTo === null);
+  const roleId = Number(localStorage.roleId);
+  const canEdit = (ticket) => {
+    if (roleId === 1 || roleId === 4) return true;
+    if (roleId === 2 && ticket.status?.toLowerCase() === "open") return true;
 
-  const isAdminOrManager = localStorage.roleId == 1 || localStorage.roleId == 4;
+    return false;
+  };
+
+  const canDelete = (ticket) => {
+    if (roleId === 1 || roleId === 4) return true;
+    if (roleId === 2 && ticket.status?.toLowerCase() === "open") return true;
+    return false;
+  };
+
+  const isAdminOrManager = roleId === 1 || roleId === 4;
 
   useEffect(() => {
     loadTickets();
@@ -25,6 +55,26 @@ function Tickets() {
       navigate("/");
     }
   }, []);
+
+  useEffect(() => {
+    loadTickets();
+    loadDropdowns();
+
+    const token = localStorage.getItem("token");
+    if (!token) navigate("/");
+  }, []);
+
+  const loadDropdowns = async () => {
+    try {
+      const cats = await getCategories();
+      const prios = await getPriorities();
+
+      setCategories(cats);
+      setPriorities(prios);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const loadTickets = async () => {
     try {
@@ -41,6 +91,44 @@ function Tickets() {
     if (localStorage.roleId === 3) return "Support Agent";
     if (localStorage.roleId === 4) return "Manager";
   }
+
+  const openEdit = (ticket) => {
+    setEditingTicket({
+      id: ticket.id,
+      title: ticket.title,
+      description: ticket.description,
+      categoryId: ticket.categoryId,
+      priorityId: ticket.priorityId,
+    });
+
+    setShowEditModal(true);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await updateTicket(editingTicket.id, editingTicket);
+
+      setShowEditModal(false);
+
+      loadTickets();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteTicket(ticketToDelete);
+
+      setTickets((prev) => prev.filter((t) => t.id !== ticketToDelete));
+
+      setShowDeleteModal(false);
+      setTicketToDelete(null);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
       case "open":
@@ -93,11 +181,12 @@ function Tickets() {
                 <th>Title</th>
                 <th>Status</th>
                 <th>Priority</th>
+                <th>Actions</th>
               </tr>
             </thead>
 
             <tbody>
-              {tickets.map((ticket) => (
+              {assignedTickets.map((ticket) => (
                 <tr
                   key={ticket.id}
                   onClick={() => navigate(`/tickets/${ticket.id}`)}
@@ -117,6 +206,28 @@ function Tickets() {
                       {ticket.priority}
                     </span>
                   </td>
+                  <td className="actions" onClick={(e) => e.stopPropagation()}>
+                    {canEdit(ticket) && (
+                      <button
+                        className="action-btn edit-btn"
+                        onClick={() => openEdit(ticket)}
+                      >
+                        <FaEdit />
+                      </button>
+                    )}
+
+                    {canDelete(ticket) && (
+                      <button
+                        className="action-btn delete-btn"
+                        onClick={() => {
+                          setTicketToDelete(ticket.id);
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        <FaTrash />
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -134,6 +245,7 @@ function Tickets() {
                     <th>Title</th>
                     <th>Status</th>
                     <th>Priority</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
@@ -160,12 +272,145 @@ function Tickets() {
                           {ticket.priority}
                         </span>
                       </td>
+                      <td
+                        className="actions"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {canEdit(ticket) && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => openEdit(ticket)}
+                          >
+                            <FaEdit />
+                          </button>
+                        )}
+
+                        {canDelete(ticket) && (
+                          <button
+                            className="action-btn delete-btn"
+                            onClick={() => {
+                              setTicketToDelete(ticket.id);
+                              setShowDeleteModal(true);
+                            }}
+                          >
+                            <FaTrash />
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </>
+        )}
+        {showEditModal && (
+          <div className="modal-overlay">
+            <div className="edit-modal">
+              <h2>Edit Ticket</h2>
+
+              <label>Title</label>
+
+              <input
+                value={editingTicket.title}
+                onChange={(e) =>
+                  setEditingTicket({
+                    ...editingTicket,
+                    title: e.target.value,
+                  })
+                }
+              />
+
+              <label>Description</label>
+
+              <textarea
+                rows={4}
+                value={editingTicket.description}
+                onChange={(e) =>
+                  setEditingTicket({
+                    ...editingTicket,
+                    description: e.target.value,
+                  })
+                }
+              />
+
+              <label>Category</label>
+
+              <select
+                value={editingTicket.categoryId}
+                onChange={(e) =>
+                  setEditingTicket({
+                    ...editingTicket,
+                    categoryId: Number(e.target.value),
+                  })
+                }
+              >
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+
+              <label>Priority</label>
+
+              <select
+                value={editingTicket.priorityId}
+                onChange={(e) =>
+                  setEditingTicket({
+                    ...editingTicket,
+                    priorityId: Number(e.target.value),
+                  })
+                }
+              >
+                {priorities.map((priority) => (
+                  <option key={priority.id} value={priority.id}>
+                    {priority.name}
+                  </option>
+                ))}
+              </select>
+
+              <div className="modal-buttons">
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+
+                <button className="save-btn" onClick={handleUpdate}>
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showDeleteModal && (
+          <div className="modal-overlay">
+            <div className="delete-modal">
+              <h2>Delete Ticket</h2>
+
+              <p>Are you sure you want to delete this ticket?</p>
+
+              <p className="delete-warning">This action cannot be undone.</p>
+
+              <div className="modal-buttons">
+                <button
+                  className="cancel-btn"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setTicketToDelete(null);
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button className="delete-confirm-btn" onClick={handleDelete}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
