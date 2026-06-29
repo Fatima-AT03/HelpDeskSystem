@@ -39,6 +39,12 @@ namespace HelpDesk.API.Mapping
                CreateMap<CreateCommentDto, TicketComment>();
 
                CreateMap<UpdateCommentDto, TicketComment>();
+
+               CreateMap<User, UserDto>();
+
+               CreateMap<CreateUserDto, User>();
+
+               CreateMap<UpdateUserDto, User>();
           }
      }
 }

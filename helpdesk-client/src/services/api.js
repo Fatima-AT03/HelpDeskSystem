@@ -319,3 +319,102 @@ export const getPriorities = async () => {
 
   return await response.json();
 };
+
+export const getUsers = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/users`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load users");
+  }
+
+  return await response.json();
+};
+
+export const getUser = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/users/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load user");
+  }
+
+  return await response.json();
+};
+
+export const createUser = async (user) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/users`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(user),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create user");
+  }
+
+  return await response.json();
+};
+
+export const updateUser = async (id, user) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/users/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(user),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update user");
+  }
+};
+
+export const deactivateUser = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/users/${id}/deactivate`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to deactivate user");
+  }
+};
+
+export const deleteUser = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error || "Failed to delete user");
+  }
+};

@@ -54,7 +54,6 @@ function TopBar({ toggleSidebar }) {
     <header className="topbar">
       <div className="left">
         <FaBars className="menu-btn" onClick={toggleSidebar} />{" "}
-        <input type="text" placeholder="Search tickets..." />
       </div>
 
       <div className="right">
